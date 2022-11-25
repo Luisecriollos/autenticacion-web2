@@ -1,24 +1,31 @@
-import { TAll } from 'jet-validator';
-
+import { TAll } from "jet-validator";
+import { ObjectId } from "mongodb";
+import { IRole } from "./Role";
 
 // **** Variables **** //
+
+export enum UserPermissions {
+  View = "users.view",
+  Update = "users.update",
+  Create = "users.create",
+  Delete = "users.delete",
+}
 
 export enum UserRoles {
   Standard,
   Admin,
 }
 
-
 // **** Types **** //
 
 export interface IUser {
-  id: number;
+  _id?: ObjectId;
+  id: string;
   name: string;
   email: string;
   pwdHash?: string;
-  role?: UserRoles;
+  role?: ObjectId | IRole[];
 }
-
 
 // **** Functions **** //
 
@@ -32,11 +39,10 @@ function _new(
   pwdHash?: string,
 ): IUser {
   return {
-    id: -1,
+    id: "",
     email,
     name,
-    role: (role ?? UserRoles.Standard),
-    pwdHash: (pwdHash ?? ''),
+    pwdHash: pwdHash ?? "",
   };
 }
 
@@ -45,6 +51,7 @@ function _new(
  */
 function copy(user: IUser): IUser {
   return {
+    _id: user._id,
     id: user.id,
     email: user.email,
     name: user.name,
@@ -59,14 +66,13 @@ function copy(user: IUser): IUser {
 function instanceOf(arg: TAll): boolean {
   return (
     !!arg &&
-    typeof arg === 'object' &&
-    'id' in arg &&
-    'email' in arg &&
-    'name' in arg &&
-    'role' in arg
+    typeof arg === "object" &&
+    "id" in arg &&
+    "email" in arg &&
+    "name" in arg &&
+    "role" in arg
   );
 }
-
 
 // **** Export default **** //
 

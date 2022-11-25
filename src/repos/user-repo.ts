@@ -1,80 +1,101 @@
-import { IUser } from '@src/models/User';
-import { getRandomInt } from '@src/declarations/functions';
-import orm from './mock-orm';
+import { IUser } from "@src/models/User";
+import { ObjectId } from "mongodb";
+import db from "../db";
 
-
+const getCollection = () => db.getDb().collection<IUser>("users");
 // **** Functions **** //
 
 /**
  * Get one user.
  */
-async function getOne(email: string): Promise<IUser | null> {
-  const db = await orm.openDb();
-  for (const user of db.users) {
-    if (user.email === email) {
-      return user;
-    }
-  }
-  return null;
-}
+const getOne = (email: string): Promise<IUser | null> => {
+  const client = getCollection();
+  return client
+    .aggregate<IUser>([
+      {
+        $match: {
+          email,
+        },
+      },
+      {
+        $lookup: {
+          from: "roles",
+          localField: "role",
+          foreignField: "_id",
+          as: "role",
+        },
+      },
+    ])
+    .tryNext();
+};
 
 /**
  * See if a user with the given id exists.
  */
-async function persists(id: number): Promise<boolean> {
-  const db = await orm.openDb();
-  for (const user of db.users) {
-    if (user.id === id) {
-      return true;
-    }
-  }
-  return false;
+async function persists(id: string): Promise<boolean> {
+  const client = getCollection();
+
+  const user = await client.findOne({ _id: { $eq: new ObjectId(id) } });
+
+  return !!user;
 }
 
 /**
  * Get all users.
  */
-async function getAll(): Promise<IUser[]> {
-  const db = await orm.openDb();
-  return db.users;
-}
+const getAll = async (): Promise<IUser[]> => {
+  const client = getCollection();
+  return client
+    .aggregate<IUser>([
+      {
+        $lookup: {
+          from: "roles",
+          localField: "role",
+          foreignField: "_id",
+          as: "role",
+        },
+      },
+    ])
+    .toArray();
+};
 
 /**
  * Add one user.
  */
-async function add(user: IUser): Promise<void> {
-  const db = await orm.openDb();
-  user.id = getRandomInt();
-  db.users.push(user);
-  return orm.saveDb(db);
+async function add(user: IUser): Promise<IUser | null> {
+  const client = getCollection();
+
+  const { insertedId } = await client.insertOne(user);
+  const result = await client.findOne({ _id: { $eq: insertedId } });
+  return result;
 }
 
 /**
  * Update a user.
  */
-async function update(user: IUser): Promise<void> {
-  const db = await orm.openDb();
-  for (let i = 0; i < db.users.length; i++) {
-    if (db.users[i].id === user.id) {
-      db.users[i] = user;
-      return orm.saveDb(db);
-    }
-  }
-}
+const update = async ({ _id, ...user }: IUser): Promise<IUser | null> => {
+  const client = getCollection();
+
+  const updated = await client.findOneAndUpdate(
+    { _id: { $eq: new ObjectId(_id) } },
+    { $set: user },
+    { returnDocument: "after" },
+  );
+  return updated.value;
+};
 
 /**
  * Delete one user.
  */
-async function _delete(id: number): Promise<void> {
-  const db = await orm.openDb();
-  for (let i = 0; i < db.users.length; i++) {
-    if (db.users[i].id === id) {
-      db.users.splice(i, 1);
-      return orm.saveDb(db);
-    }
-  }
-}
+const _delete = async (id: string): Promise<void> => {
+  const client = getCollection();
 
+  await client.deleteOne({
+    _id: {
+      $eq: new ObjectId(id),
+    },
+  });
+};
 
 // **** Export default **** //
 

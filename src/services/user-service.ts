@@ -1,13 +1,12 @@
-import userRepo from '@src/repos/user-repo';
-import { IUser } from '@src/models/User';
-import { RouteError } from '@src/declarations/classes';
-import HttpStatusCodes from '@src/declarations/major/HttpStatusCodes';
-
+import userRepo from "@src/repos/user-repo";
+import { IUser } from "@src/models/User";
+import { RouteError } from "@src/declarations/classes";
+import HttpStatusCodes from "@src/declarations/major/HttpStatusCodes";
 
 // **** Variables **** //
 
-export const userNotFoundErr = 'User not found';
-
+export const userNotFoundErr = "User not found",
+  missingIdErr = "Missing user id";
 
 // **** Functions **** //
 
@@ -21,20 +20,20 @@ function getAll(): Promise<IUser[]> {
 /**
  * Add one user.
  */
-function addOne(user: IUser): Promise<void> {
+function addOne(user: IUser): Promise<IUser | null> {
   return userRepo.add(user);
 }
 
 /**
  * Update one user.
  */
-async function updateOne(user: IUser): Promise<void> {
-  const persists = await userRepo.persists(user.id);
+async function updateOne(user: IUser): Promise<IUser | null> {
+  if (!user._id) {
+    throw new RouteError(HttpStatusCodes.BAD_REQUEST, missingIdErr);
+  }
+  const persists = await userRepo.persists(user._id.toString());
   if (!persists) {
-    throw new RouteError(
-      HttpStatusCodes.NOT_FOUND,
-      userNotFoundErr,
-    );
+    throw new RouteError(HttpStatusCodes.NOT_FOUND, userNotFoundErr);
   }
   // Return user
   return userRepo.update(user);
@@ -43,18 +42,14 @@ async function updateOne(user: IUser): Promise<void> {
 /**
  * Delete a user by their id.
  */
-async function _delete(id: number): Promise<void> {
+async function _delete(id: string): Promise<void> {
   const persists = await userRepo.persists(id);
   if (!persists) {
-    throw new RouteError(
-      HttpStatusCodes.NOT_FOUND,
-      userNotFoundErr,
-    );
+    throw new RouteError(HttpStatusCodes.NOT_FOUND, userNotFoundErr);
   }
   // Delete user
   return userRepo.delete(id);
 }
-
 
 // **** Export default **** //
 
