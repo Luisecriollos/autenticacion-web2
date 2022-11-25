@@ -6,7 +6,7 @@
 import { Request, Response, NextFunction } from "express";
 
 import { IUser } from "@src/models/User";
-import { IRole, RolePermissions } from "@src/models/Role";
+import { IRole, Permissions } from "@src/models/Role";
 import HttpStatusCodes from "@src/declarations/major/HttpStatusCodes";
 
 const userUnauthErr = "User not authorized to perform this action";
@@ -17,7 +17,7 @@ const userUnauthErr = "User not authorized to perform this action";
  * See note at beginning of file.
  */
 const permMw =
-  (permissions: RolePermissions[]) =>
+  (permissions: Permissions[]) =>
   (req: Request, res: Response, next: NextFunction) => {
     // Extract the token
     const userData = res.locals.sessionUser as IUser;
