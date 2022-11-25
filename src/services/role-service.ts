@@ -1,5 +1,7 @@
 import roleRepo from "@src/repos/role-repo";
 import { IRole } from "@src/models/Role";
+import { RouteError } from "@src/declarations/classes";
+import HttpStatusCodes from "@src/declarations/major/HttpStatusCodes";
 
 // **** Variables **** //
 
@@ -24,35 +26,35 @@ function addOne(role: IRole): Promise<IRole | null> {
 /**
  * Update one role.
  */
-// async function updateOne(role: IRole): Promise<IRole | null> {
-//   if (!role._id) {
-//     throw new RouteError(HttpStatusCodes.BAD_REQUEST, "Missing role id");
-//   }
-//   const persists = await roleRepo.persists(role._id.toString());
-//   if (!persists) {
-//     throw new RouteError(HttpStatusCodes.NOT_FOUND, userNotFoundErr);
-//   }
-//   // Return user
-//   return roleRepo.update(role);
-// }
+const updateOne = async (role: IRole): Promise<IRole | null> => {
+  if (!role._id) {
+    throw new RouteError(HttpStatusCodes.BAD_REQUEST, "Missing role id");
+  }
+  const persists = await roleRepo.persists(role._id.toString());
+  if (!persists) {
+    throw new RouteError(HttpStatusCodes.NOT_FOUND, userNotFoundErr);
+  }
+  // Return role
+  return roleRepo.update(role);
+};
 
 /**
- * Delete a user by their id.
+ * Delete a role by their id.
  */
-// async function _delete(id: string): Promise<void> {
-//   const persists = await roleRepo.persists(id);
-//   if (!persists) {
-//     throw new RouteError(HttpStatusCodes.NOT_FOUND, userNotFoundErr);
-//   }
-//   // Delete user
-//   return roleRepo.delete(id);
-// }
+async function _delete(id: string): Promise<void> {
+  const persists = await roleRepo.persists(id);
+  if (!persists) {
+    throw new RouteError(HttpStatusCodes.NOT_FOUND, userNotFoundErr);
+  }
+  // Delete role
+  return roleRepo.delete(id);
+}
 
 // **** Export default **** //
 
 export default {
   getAll,
   addOne,
-  //   updateOne,
-  //   delete: _delete,
+  updateOne,
+  delete: _delete,
 } as const;

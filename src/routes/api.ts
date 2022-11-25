@@ -7,6 +7,7 @@ import authRoutes from "./auth-routes";
 import userRoutes from "./user-routes";
 import roleRoutes from "./role-routes";
 import permMw from "./shared/permMw";
+import { RolePermissions } from "@src/models/Role";
 
 // **** Init **** //
 
@@ -33,6 +34,9 @@ apiRouter.use(authRoutes.paths.basePath, authRouter);
 // **** Setup user routes **** //
 
 const userRouter = Router();
+
+// Get profile
+userRouter.get(userRoutes.paths.profile, userRoutes.getProfile);
 
 // Get all users
 userRouter.get(
@@ -72,9 +76,23 @@ apiRouter.use(userRoutes.paths.basePath, authMw, userRouter);
 
 const roleRouter = Router();
 
-roleRouter.get(roleRoutes.paths.get, roleRoutes.getAll);
+roleRouter.get(
+  roleRoutes.paths.get,
+  permMw([RolePermissions.View]),
+  roleRoutes.getAll,
+);
 
-roleRouter.post(roleRoutes.paths.add, roleRoutes.add);
+roleRouter.post(
+  roleRoutes.paths.add,
+  permMw([RolePermissions.Create]),
+  roleRoutes.add,
+);
+
+roleRouter.put(
+  roleRoutes.paths.update,
+  permMw([RolePermissions.Update]),
+  roleRoutes.update,
+);
 
 apiRouter.use(roleRoutes.paths.basePath, authMw, roleRouter);
 

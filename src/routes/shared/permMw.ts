@@ -23,7 +23,7 @@ const permMw =
     const userData = res.locals.sessionUser as IUser;
     if (
       permissions.some((perm) =>
-        (userData.role as IRole[])[0].permissions.includes(perm),
+        (userData.role as IRole[])[0]?.permissions.includes(perm),
       )
     ) {
       return next();

@@ -18,45 +18,46 @@ const paths = {
 // **** Functions **** //
 
 /**
- * Get all users.
+ * Get all roles.
  */
-async function getAll(_: IReq, res: IRes) {
-  const users = await rolesService.getAll();
-  return res.status(HttpStatusCodes.OK).json(users);
-}
+const getAll = async (_: IReq, res: IRes) => {
+  const roles = await rolesService.getAll();
+  return res.status(HttpStatusCodes.OK).json(roles);
+};
 
 /**
- * Add one user.
+ * Add one role.
  */
-async function add(req: IReq<{ role: IRole }>, res: IRes) {
+const add = async (req: IReq<{ role: IRole }>, res: IRes) => {
   const { role } = req.body;
   const created = await rolesService.addOne(role);
   return res.status(HttpStatusCodes.CREATED).json(created);
-}
+};
 
 /**
- * Update one user.
+ * Update one role.
  */
-// async function update(req: IReq<{ role: IRole }>, res: IRes) {
-//   const { role } = req.body;
-//   const updated = await rolesService.updateOne(role);
-//   return res.status(HttpStatusCodes.OK).json(updated);
-// }
+const update = async (req: IReq<{ role: IRole }>, res: IRes) => {
+  const { role } = req.body;
+  const updated = await rolesService.updateOne(role);
+  return res.status(HttpStatusCodes.OK).json(updated);
+};
 
 /**
- * Delete one user.
+ * Delete one role.
  */
-// async function _delete(req: IReq, res: IRes) {
-//   const id = req.params.id;
-//   await userService.delete(id);
-//   return res.status(HttpStatusCodes.OK).end();
-// }
+const _delete = async (req: IReq, res: IRes) => {
+  const id = req.params.id;
+  await rolesService.delete(id);
+  return res.status(HttpStatusCodes.OK).end();
+};
 
 // **** Export default **** //
 
 export default {
   paths,
-  //   getOne,
+  update,
   getAll,
   add,
+  delete: _delete,
 } as const;

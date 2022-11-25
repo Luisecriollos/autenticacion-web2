@@ -11,6 +11,7 @@ import pwdUtil from "@src/util/pwd-util";
 // Paths
 const paths = {
   basePath: "/users",
+  profile: "/me",
   get: "/all",
   add: "/add",
   update: "/update",
@@ -26,6 +27,13 @@ async function getAll(_: IReq, res: IRes) {
   const users = await userService.getAll();
   return res.status(HttpStatusCodes.OK).json(users);
 }
+
+/**
+ * Get profile.
+ */
+const getProfile = (_: IReq, res: IRes) => {
+  return res.status(HttpStatusCodes.OK).json(res.locals.sessionUser);
+};
 
 /**
  * Add one user.
@@ -63,6 +71,7 @@ async function _delete(req: IReq, res: IRes) {
 
 export default {
   paths,
+  getProfile,
   getAll,
   add,
   update,
